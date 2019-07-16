@@ -1,4 +1,5 @@
 var mysql = require("mysql");
+var columnify = require("columnify");
 
 var connection = mysql.createConnection({
   host: "localhost",
@@ -24,8 +25,17 @@ var sequel = "SELECT * FROM products";
 
 function afterConnection1() {
   connection.query(sequel, function(err, res) {
+
     if (err) throw err;
-    console.log(res);
+
+    // console.log(res);
+
+    var columns = columnify(res, {
+      columnSplitter: ' | '
+    });
+     
+    console.log(columns);
+
     connection.end();
   });
 }
