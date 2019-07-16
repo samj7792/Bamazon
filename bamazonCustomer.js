@@ -9,10 +9,10 @@ var connection = mysql.createConnection({
   port: 3306,
 
   // Your username
-  user: "root",
+  user: "github",
 
   // Your password
-  password: "",
+  password: "github",
   database: "bamazon"
 });
 
@@ -27,9 +27,15 @@ connection.connect(function(err) {
   // connection.end();
 });
 
-var sequel = "SELECT * FROM products";
+
+
+var purchaseCount = 0;
+var stockCount = 0;
+var product = "";
 
 function displayProducts() {
+
+  var sequel = "SELECT * FROM products";
   connection.query(sequel, function(err, res) {
 
     if (err) throw err;
@@ -70,15 +76,22 @@ function displayProducts() {
     .then(function(inquirerResponse){
 
       // console.log(inquirerResponse.purchase);
+      purchaseCount = inquirerResponse.purchase;
 
-      connection.query("select * from products where item_id = ?", inquirerResponse.purchase, function(err,res) {
+      connection.query("select * from products where item_id = ?", purchaseCount, function(err,res) {
         if (err) throw err;
 
-        if (res[0].stock > inquirerResponse.count) {
+        stockCount = res[0].stock_quantity;
 
-          console.log("You chose to purchase " + inquirerResponse.count + " " + res[0].product_name + "(s)");
+        product = res[0].product_name;
 
-          console.log("Your purchase cost is $" + inquirerResponse.count * res[0].price);
+        if (stockCount >= purchaseCount) {
+
+          console.log("You chose to purchase " + purchaseCount + " " + product + "(s)");
+
+          console.log("Your purchase cost is $" + (purchaseCount * res[0].price).toFixed(2));
+
+          updateDB();
       
         }
 
@@ -86,7 +99,7 @@ function displayProducts() {
           console.log("Not enough in stock!");
         }
 
-        connection.end();
+        //connection.end();
       })
 
     })
@@ -95,3 +108,10 @@ function displayProducts() {
   });
 }
 
+function updateDB() {
+  var update = "update products set stock_quantity = ? where product_name = ?";
+  connection.query(update, [stockCount - purchaseCount, product], function(err,res){
+    console.log("Products Database Updated");
+    connection.end();
+  })
+}
