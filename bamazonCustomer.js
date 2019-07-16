@@ -32,6 +32,7 @@ connection.connect(function(err) {
 var purchaseCount = 0;
 var stockCount = 0;
 var product = "";
+var itemIds = [];
 
 function displayProducts() {
 
@@ -52,59 +53,12 @@ function displayProducts() {
     
     console.log(columns);
 
-    var itemIds = [];
 
     for (var i = 0; i < res.length; i++) {
       itemIds.push(res[i].item_id);
     }
 
-    // Ask user what they would like to buy
-    inquirer
-    .prompt([
-      {
-        type: "list",
-        message: "What would you like to buy (by ITEM_ID)?",
-        choices: itemIds,
-        name: "purchase"
-      },
-      {
-        type: "prompt",
-        message: "How many would you like to buy (enter a number)?",
-        name: "count"
-      }
-    ])
-    .then(function(inquirerResponse){
-
-      // console.log(inquirerResponse.purchase);
-      purchaseCount = inquirerResponse.purchase;
-
-      connection.query("select * from products where item_id = ?", purchaseCount, function(err,res) {
-        if (err) throw err;
-
-        stockCount = res[0].stock_quantity;
-
-        product = res[0].product_name;
-
-        if (stockCount >= purchaseCount) {
-
-          console.log("You chose to purchase " + purchaseCount + " " + product + "(s)");
-
-          console.log("Your purchase cost is $" + (purchaseCount * res[0].price).toFixed(2));
-
-          updateDB();
-      
-        }
-
-        else {
-          console.log("Not enough in stock!");
-        }
-
-        //connection.end();
-      })
-
-    })
-
-    //connection.end();
+    askBuyer();
   });
 }
 
@@ -113,5 +67,52 @@ function updateDB() {
   connection.query(update, [stockCount - purchaseCount, product], function(err,res){
     console.log("Products Database Updated");
     connection.end();
+  })
+}
+
+function askBuyer() {
+  // Ask user what they would like to buy
+  inquirer
+  .prompt([
+    {
+      type: "list",
+      message: "What would you like to buy (by ITEM_ID)?",
+      choices: itemIds,
+      name: "purchase"
+    },
+    {
+      type: "prompt",
+      message: "How many would you like to buy (enter a number)?",
+      name: "count"
+    }
+  ])
+  .then(function(inquirerResponse){
+
+    // console.log(inquirerResponse.purchase);
+    purchaseCount = inquirerResponse.count;
+
+    purchaseItem = inquirerResponse.purchase;
+
+    connection.query("select * from products where item_id = ?", purchaseItem, function(err,res) {
+      if (err) throw err;
+
+      stockCount = res[0].stock_quantity;
+
+      product = res[0].product_name;
+
+      if (stockCount >= purchaseCount) {
+
+        console.log("You chose to purchase " + purchaseCount + " " + product + "(s)");
+
+        console.log("Your purchase cost is $" + (purchaseCount * res[0].price).toFixed(2));
+
+        updateDB();    
+      }
+
+      else {
+        console.log("Not enough in stock!");
+        displayProducts();
+      }
+    })
   })
 }
