@@ -24,7 +24,7 @@ connection.connect(function(err) {
 
   displayProducts();
 
-  connection.end();
+  // connection.end();
 });
 
 var sequel = "SELECT * FROM products";
@@ -60,17 +60,38 @@ function displayProducts() {
         message: "What would you like to buy (by ITEM_ID)?",
         choices: itemIds,
         name: "purchase"
+      },
+      {
+        type: "prompt",
+        message: "How many would you like to buy (enter a number)?",
+        name: "count"
       }
     ])
     .then(function(inquirerResponse){
 
-      if (inquirerResponse.transport) {
-        
-      }
+      // console.log(inquirerResponse.purchase);
+
+      connection.query("select * from products where item_id = ?", inquirerResponse.purchase, function(err,res) {
+        if (err) throw err;
+
+        if (res[0].stock > inquirerResponse.count) {
+
+          console.log("You chose to purchase " + inquirerResponse.count + " " + res[0].product_name + "(s)");
+
+          console.log("Your purchase cost is $" + inquirerResponse.count * res[0].price);
+      
+        }
+
+        else {
+          console.log("Not enough in stock!");
+        }
+
+        connection.end();
+      })
 
     })
 
-    // connection.end();
+    //connection.end();
   });
 }
 
