@@ -23,3 +23,33 @@ connection.connect(function(err) {
 
     promptSup();
 })
+
+function promptSup() {
+
+    inquirer.prompt([
+        {
+            type: 'list',
+            message: 'What would you like to do?',
+            choices: ['View product sales by department', 'Create new department', 'Exit'],
+            name: 'choice'
+        }
+    ])
+    .then(function(inqRes) {
+
+        switch(inqRes.choice) {
+            case 'View product sales by department':
+                viewSales();
+                break;
+            case 'Create new department':
+                createDpt();
+                break;
+            case 'Exit':
+                exit();
+                break;
+        }
+    })
+}
+
+function exit() {
+    connection.end();
+}
