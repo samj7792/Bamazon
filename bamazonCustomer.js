@@ -38,7 +38,7 @@ var sales = 0;
 
 function displayProducts() {
 
-  var sequel = "SELECT * FROM products";
+  var sequel = "SELECT product_name, department_name, price, stock_quantity FROM products";
   connection.query(sequel, function(err, res) {
 
     if (err) throw err;
