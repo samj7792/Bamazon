@@ -25,6 +25,10 @@ connection.connect(function(err) {
   promptMngr();
 });
 
+var itemIds = [];
+var product = '';
+var stockCount = 0;
+var addCount = 0;
 
 function promptMngr() {
   inquirer.prompt ([
@@ -53,6 +57,77 @@ function promptMngr() {
             exit();
             break;
       }
+    })
+}
+
+function addInv() {
+    var select = 'SELECT * FROM products';
+    connection.query(select, function (err,res) {
+        if (err) throw err;
+
+        for (var i = 0; i < res.length; i++) {
+            itemIds.push(res[i].item_id);
+        }
+
+        var columns = columnify(res, {
+            columnSplitter: ' | ', 
+            paddingChr: '.',
+        });
+
+        console.log('Here is the current stock\n');
+
+        console.log(columns);
+
+        addInvPrompt();
+    })
+}
+
+function addInvPrompt() {
+    inquirer.prompt([
+        {
+            type: 'list',
+            message: 'What product (by item_id) would you like to add?',
+            choices: itemIds,
+            name: 'product',
+        },
+        {
+            type: 'prompt',
+            message: 'How many would you like to add (enter a number)?',
+            name: 'count'
+        }
+    ]).then(function(inqRes) {
+
+        var select = 'SELECT * FROM products WHERE item_id = ?';
+        
+        product = inqRes.product;
+
+        //console.log(product);
+
+        addCount = parseInt(inqRes.count);
+
+        connection.query(select, product, function(err,res) {
+            if(err) throw err;
+
+            //console.log(res);
+
+            stockCount = res[0].stock_quantity;
+
+            updateDB();
+        })
+    })
+}
+
+function updateDB() {
+
+    var update = 'UPDATE products SET stock_quantity = ? WHERE item_id = ?';
+
+    var updateArr = [stockCount + addCount, product];
+
+    connection.query(update, updateArr, function(err,res) {
+
+        console.log('Products added');
+
+        promptMngr();
     })
 }
 
@@ -89,7 +164,7 @@ function lowInv() {
 
 function viewProds() {
 
-    var select = "SELECT * FROM products";
+    var select = 'SELECT * FROM products';
     connection.query(select, function (err,res) {
         if (err) throw err;
 
