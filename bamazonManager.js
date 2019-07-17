@@ -60,6 +60,46 @@ function promptMngr() {
     })
 }
 
+function newProd() {
+
+    inquirer.prompt([
+        {
+            type: 'prompt',
+            message: 'What is the name of the product you would like to add?',
+            name: 'product'
+        },
+        {
+            type: 'prompt',
+            message: 'To which department does the product belong?',
+            name: 'department'
+        },
+        {
+            type: 'prompt',
+            message: 'How much will the product cost?',
+            name: 'price'
+        },
+        {
+            type: 'prompt',
+            message: 'How much stock of the product would you like to add?',
+            name: 'stock'
+        }
+    ]).then(function(inqRes) {
+
+        var stockArr = [inqRes.product, inqRes.department, inqRes.price, inqRes.stock];
+
+        var insert = 'INSERT INTO products (product_name, department_name, price, stock_quantity) values (?, ?, ?, ?)';
+
+        connection.query(insert, stockArr, function(err, res) {
+
+            if (err) throw err;
+
+            console.log(stockArr[0] + ' has been added to the inventory.');
+
+            promptMngr();
+        })
+    })
+}
+
 function addInv() {
     var select = 'SELECT * FROM products';
     connection.query(select, function (err,res) {
