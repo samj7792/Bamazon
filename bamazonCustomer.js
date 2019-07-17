@@ -55,7 +55,7 @@ function displayProducts() {
 
 
     for (var i = 0; i < res.length; i++) {
-      itemIds.push(res[i].item_id);
+      itemIds.push(res[i].product_name);
     }
 
     askBuyer();
@@ -76,7 +76,7 @@ function askBuyer() {
   .prompt([
     {
       type: "list",
-      message: "What would you like to buy (by ITEM_ID)?",
+      message: "What would you like to buy?",
       choices: itemIds,
       name: "purchase"
     },
@@ -93,7 +93,7 @@ function askBuyer() {
 
     purchaseItem = inquirerResponse.purchase;
 
-    connection.query("select * from products where item_id = ?", purchaseItem, function(err,res) {
+    connection.query("select * from products where product_name = ?", purchaseItem, function(err,res) {
       if (err) throw err;
 
       stockCount = res[0].stock_quantity;
