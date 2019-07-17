@@ -23,8 +23,6 @@ connection.connect(function(err) {
   console.log("connected as id " + connection.threadId);
 
   promptMngr();
-
-  // connection.end();
 });
 
 
@@ -58,6 +56,37 @@ function promptMngr() {
     })
 }
 
+function lowInv() {
+    
+    var selectLow = "SELECT * FROM products WHERE stock_quantity < 5"
+
+    connection.query(selectLow, function(err,res) {
+
+        if (err) throw err;
+
+        console.log(res.length);
+
+        var columns = columnify(res, {
+            columnSplitter: ' | ',
+            paddingChr: '.'
+        });
+
+        if (res.length === 0) {
+            console.log('No low inventory')
+
+            promptMngr();
+        }
+
+        else {
+            console.log('Here is the low inventory\n');
+
+            console.log(columns);
+
+            promptMngr();
+        }
+    })
+}
+
 function viewProds() {
 
     var select = "SELECT * FROM products";
@@ -65,7 +94,7 @@ function viewProds() {
         if (err) throw err;
 
         var columns = columnify(res, {
-            columnSplitter: '|', 
+            columnSplitter: ' | ', 
             paddingChr: '.',
         });
 
@@ -75,8 +104,6 @@ function viewProds() {
 
         promptMngr();
     })
-
-    // connection.end();
 }
 
 function exit() {
