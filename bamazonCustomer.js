@@ -33,6 +33,8 @@ var purchaseCount = 0;
 var stockCount = 0;
 var product = "";
 var itemIds = [];
+var price = 0;
+var sales = 0;
 
 function displayProducts() {
 
@@ -63,9 +65,13 @@ function displayProducts() {
 }
 
 function updateDB() {
-  var update = "update products set stock_quantity = ? where product_name = ?";
-  connection.query(update, [stockCount - purchaseCount, product], function(err,res){
+
+  var update = "UPDATE products SET stock_quantity = ?, product_sales = ? WHERE product_name = ?";
+
+  connection.query(update, [stockCount - purchaseCount, sales.toFixed(2), product], function(err,res){
+
     console.log("Products Database Updated");
+
     connection.end();
   })
 }
@@ -83,7 +89,13 @@ function askBuyer() {
     {
       type: "prompt",
       message: "How many would you like to buy (enter a number)?",
-      name: "count"
+      name: "count",
+      validate: function(value) {
+        if (isNaN(value) === false && value > 0) {
+          return true;
+        }
+        return false;
+      }
     }
   ])
   .then(function(inquirerResponse){
@@ -94,23 +106,30 @@ function askBuyer() {
     purchaseItem = inquirerResponse.purchase;
 
     connection.query("select * from products where product_name = ?", purchaseItem, function(err,res) {
+
       if (err) throw err;
 
       stockCount = res[0].stock_quantity;
 
       product = res[0].product_name;
 
+      price = res[0].price;
+
+      sales = (res[0].price * purchaseCount) + res[0].product_sales;
+
       if (stockCount >= purchaseCount) {
 
         console.log("You chose to purchase " + purchaseCount + " " + product + "(s)");
 
-        console.log("Your purchase cost is $" + (purchaseCount * res[0].price).toFixed(2));
+        console.log("Your purchase cost is $" + (purchaseCount * price).toFixed(2));
 
         updateDB();    
       }
 
       else {
+
         console.log("Not enough in stock!");
+
         displayProducts();
       }
     })

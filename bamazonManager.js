@@ -76,12 +76,24 @@ function newProd() {
         {
             type: 'prompt',
             message: 'How much will the product cost?',
-            name: 'price'
+            name: 'price',
+            validate: function(value) {
+                if (isNaN(value) === false && value > 0) {
+                  return true;
+                }
+                return false;
+            }
         },
         {
             type: 'prompt',
             message: 'How much stock of the product would you like to add?',
-            name: 'stock'
+            name: 'stock',
+            validate: function(value) {
+                if (isNaN(value) === false && value > 0) {
+                  return true;
+                }
+                return false;
+            }
         }
     ]).then(function(inqRes) {
 
@@ -133,7 +145,13 @@ function addInvPrompt() {
         {
             type: 'prompt',
             message: 'How many would you like to add (enter a number)?',
-            name: 'count'
+            name: 'count',
+            validate: function(value) {
+                if (isNaN(value) === false && value > 0) {
+                  return true;
+                }
+                return false;
+            }
         }
     ]).then(function(inqRes) {
 
