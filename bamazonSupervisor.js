@@ -52,7 +52,11 @@ function promptSup() {
 
 function viewSales() {
     
-    var join = 'SELECT departments.department_id, departments.department_name, departments.over_head_costs, products.product_sales FROM departments INNER JOIN products ON departments.department_name = products.department_name GROUP BY department_name'
+    var join = 'SELECT d.department_id, d.department_name, d.over_head_costs, SUM(p.product_sales) AS product_sales, SUM(p.product_sales) - d.over_head_costs AS total_profit ';
+    
+    join += 'FROM departments AS d INNER JOIN products AS p ';
+    
+    join += 'ON d.department_name = p.department_name GROUP BY department_name;'
 
     connection.query(join, function(err,res) {
 
