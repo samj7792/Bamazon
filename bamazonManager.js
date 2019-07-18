@@ -99,7 +99,7 @@ function newProd() {
 
         var stockArr = [inqRes.product, inqRes.department, inqRes.price, inqRes.stock];
 
-        var insert = 'INSERT INTO products (product_name, department_name, price, stock_quantity) values (?, ?, ?, ?)';
+        var insert = 'INSERT INTO products (product_name, department_name, price, stock_quantity, product_sales) values (?, ?, ?, ?, 0.00)';
 
         connection.query(insert, stockArr, function(err, res) {
 

@@ -50,6 +50,42 @@ function promptSup() {
     })
 }
 
+function createDpt() {
+
+    inquirer.prompt([
+        {
+            type: 'prompt',
+            message: 'What is the name of the department you would like to add?',
+            name: 'department'
+        },
+        {
+            type: 'prompt',
+            message: 'What are the over head costs of this new department?',
+            name: 'overhead',
+            validate: function(value) {
+                if (isNaN(value) === false && value > 0) {
+                  return true;
+                }
+                return false;
+            }
+        }
+    ]).then(function(inqRes) {
+
+        var deptArr = [inqRes.department, inqRes.overhead];
+
+        var insert = 'INSERT INTO departments (department_name, over_head_costs) VALUES (?, ?);'
+
+        connection.query(insert, deptArr, function(err,res) {
+
+            if (err) throw err;
+
+            console.log('The new department "' + deptArr[0] + '" has been added with over head cost of $' + deptArr[1] + '.');
+
+            promptSup();
+        })
+    })
+}
+
 function viewSales() {
     
     var join = 'SELECT d.department_id, d.department_name, d.over_head_costs, SUM(p.product_sales) AS product_sales, SUM(p.product_sales) - d.over_head_costs AS total_profit ';
