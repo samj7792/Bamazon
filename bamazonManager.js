@@ -29,6 +29,7 @@ var itemIds = [];
 var product = '';
 var stockCount = 0;
 var addCount = 0;
+var dptmntNames= [];
 
 function promptMngr() {
   inquirer.prompt ([
@@ -62,54 +63,65 @@ function promptMngr() {
 
 function newProd() {
 
-    inquirer.prompt([
-        {
-            type: 'prompt',
-            message: 'What is the name of the product you would like to add?',
-            name: 'product'
-        },
-        {
-            type: 'prompt',
-            message: 'To which department does the product belong?',
-            name: 'department'
-        },
-        {
-            type: 'prompt',
-            message: 'How much will the product cost?',
-            name: 'price',
-            validate: function(value) {
-                if (isNaN(value) === false && value > 0) {
-                  return true;
-                }
-                return false;
-            }
-        },
-        {
-            type: 'prompt',
-            message: 'How much stock of the product would you like to add?',
-            name: 'stock',
-            validate: function(value) {
-                if (isNaN(value) === false && value > 0) {
-                  return true;
-                }
-                return false;
-            }
+    var select = 'SELECT department_name FROM departments'
+
+    connection.query(select, function(err, res) {
+
+        for (var i = 0; i < res.length; i++) {
+
+            dptmntNames.push(res[i].department_name)
         }
-    ]).then(function(inqRes) {
 
-        var stockArr = [inqRes.product, inqRes.department, inqRes.price, inqRes.stock];
+        inquirer.prompt([
+            {
+                type: 'prompt',
+                message: 'What is the name of the product you would like to add?',
+                name: 'product'
+            },
+            {
+                type: 'list',
+                message: 'To which department does the product belong?',
+                choices: dptmntNames,
+                name: 'department'
+            },
+            {
+                type: 'prompt',
+                message: 'How much will the product cost?',
+                name: 'price',
+                validate: function(value) {
+                    if (isNaN(value) === false && value > 0) {
+                        return true;
+                    }
+                    return false;
+                }
+            },
+            {
+                type: 'prompt',
+                message: 'How much stock of the product would you like to add?',
+                name: 'stock',
+                validate: function(value) {
+                    if (isNaN(value) === false && value > 0) {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+        ]).then(function(inqRes) {
 
-        var insert = 'INSERT INTO products (product_name, department_name, price, stock_quantity, product_sales) values (?, ?, ?, ?, 0.00)';
+            var stockArr = [inqRes.product, inqRes.department, inqRes.price, inqRes.stock];
 
-        connection.query(insert, stockArr, function(err, res) {
+            var insert = 'INSERT INTO products (product_name, department_name, price, stock_quantity, product_sales) VALUES (?, ?, ?, ?, 0.00)';
 
-            if (err) throw err;
+            connection.query(insert, stockArr, function(err, res) {
 
-            console.log(stockArr[0] + ' has been added to the inventory.');
+                if (err) throw err;
 
-            promptMngr();
-        })
-    })
+                console.log(stockArr[0] + ' has been added to the inventory.');
+
+                promptMngr();
+            });
+        });
+    });
 }
 
 function addInv() {
